@@ -1,0 +1,284 @@
+#include<stdio.h>
+#include<string.h>
+#define limite_partidas 100
+
+
+typedef struct     //estructura para el nombre de la partida/jugador
+{
+	char nombre_partida[100];
+
+}partida;
+
+typedef struct    //estructura para contar el tiempo jugado por el jugador
+{
+	char nombre_partida[100];
+	int tiempo;
+
+}tiempo;
+
+
+void menu(int *opcion);         //funcion del menu
+
+void instrucciones(int *informacion);           //funcion de las instruciones
+
+void nueva_partida(char nombre_jugador[], int *numero_partidas, partida datos[]);            //funcion que crea una partida nueva
+
+int  comprobar_fichero_partidas(partida datos[], int *numero_partidas);             //funcion que comprueba si existe la partida seleccionada
+
+void cargar_partida(char nombre_jugador[], int *numero_partidas, partida datos[]);           //funcion que carga partida seleccionada
+
+//int  juego();           //funcion que realiza el juego
+
+int main()
+{
+    int opciones, info;
+
+/////falta crear los nombres que iran en el main y colocarlos en las llamadas a las funciones
+
+    char jugador[100];
+
+
+
+    FILE * pv;  //poner nombre adecuado para las partidas
+    int NP = 0;   //contador numero de partidas
+    partida nombre[limite_partidas];
+
+    //FILE *p;  //poner nombre adecuado el tiempo
+
+
+    do
+    {
+        menu(&opciones);
+
+        switch(opciones)
+        {
+            case 1:
+                if(comprobar_fichero_partidas(nombre, &NP) == 0)  //comprueba que exista el fichero con las partidas
+                {
+                    return 0;
+                }
+                else
+                {
+                    nueva_partida(jugador, &NP, nombre);   //crea una partida nueva
+                }
+                break;
+
+            case 2:
+                if(comprobar_fichero_partidas(nombre, &NP) == 0)    //comprueba que exista el fichero con las partidas
+				{
+					return 0;
+				}
+				else
+				{
+					cargar_partida(jugador, &NP, nombre);    //carga una partida creada
+				}
+
+                break;
+
+            case 3:
+                instrucciones(&info);
+                break;
+
+            case 4:
+                printf("juego terminado\n");
+                break;
+
+            default:
+                printf("Opcion incorrecta\n");
+				break;
+        }
+    }
+    while(opciones != 4);
+
+
+return 0;
+}
+
+
+
+void menu(int *opcion)
+{
+	system("cls");  //Borrar pantalla o no, para poder mirar cuando se quiera las instruciones
+
+	printf("Bienvenido a EscapeROM\n");
+
+	printf("Selecciona la opcion:\n");
+
+	printf("Nueva partida   1\n");
+	printf("Cargar partida  2\n");
+	printf("Intrucciones    3\n");
+	printf("Salir           4\n");
+
+	fflush(stdin);
+	scanf("%i", &*opcion);
+}
+
+void instrucciones(int *informacion)
+{
+	printf("INSTRUCCIONES\n");
+
+	printf("El juego se basa en un escape room. La finalidad es buscar la salida antes de que se te acabe el tiempo resolviendo acertijos.\n");
+	printf("En este juego interactuas con el entorno que se te ira desribiendo a medida que avances en el juego con tus decisones.\n");
+	printf("Este juego utiliza palabras y objetos clave que te seriran para interactuar con objetos para poder avanzar.\n");
+	printf("Tienes un inventario de hasta tres objetos. No podras recuperar un objeto si has pasado de fase.\n");
+
+	//printf("IMPORTANTE: Para que el juego funcione debes crear en tu equipo un fichero usuarios.txt y otro llamado ranking.txt\nambos vacios\n");
+
+	do
+	{
+		printf("Para saber cuales son las palabras clave pulse a, para saber cuales son los objetos clave pulse b, pulse c para salir del menu.\n");
+		printf("\n");
+		printf("Palabras clave   1\n");
+		printf("Objetos clave    2\n");
+		printf("Salir del menu   3\n");
+		printf("\n");
+
+		fflush(stdin);
+
+		scanf("%i",&*informacion);
+
+		switch (*informacion)
+		{
+            case 1:
+                printf("Palabras clave:\n");
+                printf("mirar, coger, tirar, pulsar, mantener \n");
+                printf("\n");
+                printf("Ejemplo: \n");
+                break;
+
+            case 2:
+                printf("Objetos clave\n");
+                printf("son objetos que se te nombraran cuando visualices tu entorno y que podras utilizar\n");
+                printf("\n");
+                printf("Ejemplo: \n");
+                break;
+
+            case 3:
+                printf("saliendo\n");
+                break;
+
+            default:
+               printf("opcion no disponible\n");
+               break;
+		}
+
+		system("PAUSE");
+	}
+	while(*informacion != 3);
+}
+
+
+int  comprobar_fichero_partidas(partida datos[], int *numero_partidas)
+{
+    FILE * pv ;   //p hay que ponerle nombre correspondiente
+    int i=0;
+
+    pv = fopen("nombredelficheroejemplo.txt", "r");   //para abrir el fichero
+
+    if(pv == NULL)      //comprobacion de que existe el fichero
+    {
+        printf("No se ha podido encontrar el fichero\n");
+		return 0;
+    }
+
+    while(fscanf(pv, "%s", &datos[i].nombre_partida) != EOF)    //comprueba o cuenta cuantas partidas hay en el fichero guardadas y se guarda en un vector contador
+    {
+        i++;
+    }
+    *numero_partidas = i;
+
+    fclose(pv);
+return 1;
+}
+
+
+void nueva_partida(char nombre_jugador[], int *numero_partidas, partida datos[])
+{
+    printf("sigue las instrucciones para crear la partida\n");
+
+    FILE * pv; //poner nombre correspondiente
+    int i, aux = 0;
+
+    do          //se comprueba que el nombre de la partida es el correcto y no existe otro igual
+    {
+        printf("nombre de la partida\n");
+
+        fflush(stdin);
+
+        scanf("%s", nombre_jugador);
+
+        for(i = 0; i < *numero_partidas; i++)
+        {
+			if(strcmp(nombre_jugador, datos[i].nombre_partida) == 0)
+			{
+				aux = 1;
+				break;
+			}
+            else
+            {
+				aux = 0;
+			}
+		}
+
+        if(aux == 1)
+        {
+			printf("el numbre de la partida ya existe, inserte otro nombre\n");
+			system("PAUSE");
+		}
+		else
+        {
+			printf("nombre de la partida aceptado\n");
+			strcpy(datos[*numero_partidas].nombre_partida, nombre_jugador);
+		}
+    }
+    while(aux == 1);
+
+    pv = fopen("nombredelficheroejemplo.txt", "w");
+
+    for(i = 0; i <= *numero_partidas; i++)          //se añaden en el fichero los datos introducidos
+    {
+        fprintf(pv, "%s\n", datos[i].nombre_partida);
+    }
+
+    fclose(pv);
+    system("PAUSE");
+}
+
+
+void cargar_partida(char nombre_jugador[], int *numero_partidas, partida datos[])
+{
+    int i, aux = 0;
+
+    printf("cargar partida\n");
+
+    do              //introduce el nombre de la partida y
+    {
+        printf("nombre de la partida\n");
+        fflush(stdin);
+        scanf("%s",nombre_jugador);
+
+        for(i = 0; i < *numero_partidas; i++)           //comprobamos que el nombre de la partida existe
+        {
+            if(strcmp(nombre_jugador,datos[i].nombre_partida) == 0)
+            {
+                aux = 1;
+                break;
+            }
+            else
+            {
+                aux = 0;
+            }
+        }
+        if(aux == 0)
+        {
+            printf("nombre de la partida incorrecto\n");
+        }
+        else
+        {
+            printf("partida correcta\n");
+        }
+        system("PAUSE");
+
+    }
+    while(aux == 0);            //mientras aux valga 0 se hace el bucle y cuando cambia deja de preguntar
+}
